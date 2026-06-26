@@ -1,44 +1,77 @@
 # 🧩 Interactive 3D Rubik's Cube Solver
 
-An intelligent, zero-friction web application designed to scan, analyze, and guide you through solving any scrambled standard 3x3 Rubik's Cube in seconds. Built to be entirely self-contained, everything happens right inside your browser with absolute processing privacy.
+A zero-friction web application to input, analyze, and solve any scrambled standard 3×3 Rubik's Cube. Everything runs entirely in your browser — no accounts, no backend, no data sent to a server.
 
 ---
 
 ## 🌟 Key Features
 
-### 📸 Real-Time Guided Scanning
+### 📋 Guided Face-by-Face Input
 
-Forget pressing a shutter button while struggling to hold your cube steady. The application acts as a smart director:
+The app walks you through all six faces in a fixed order (White → Red → Green → Yellow → Orange → Blue):
 
-* **Interactive State Machine:** The interface tells you exactly which face to display first (e.g., "Show the White center face") and visually prompts you on how to rotate it next (e.g., "Rotate the cube right to show the Red face").
-* **Chromatic Stability Engine:** The app continuously screens the video feed, ignoring motion blur or fast adjustments. The millisecond it detects the cube is held perfectly still, it automatically "snaps" and logs that face configuration.
-* **Smart Face Validation:** Automatically verifies the center sticker color against the requested sequence to prevent out-of-order scans.
+* **Step-by-step prompts:** Each step tells you which face to scan and which color should be on top for consistent orientation.
+* **Progress tracker:** A cube net and face list show which faces are done and let you jump back to any step.
+* **State string:** Once all six faces are filled, the cube is encoded as a 54-character string you can also paste or edit directly.
+
+### 📸 Camera Capture (Mobile)
+
+On mobile devices, you can use the device camera to photograph each face:
+
+* **Manual capture:** Start the camera, hold the cube steady, and tap **Capture** when ready.
+* **Upload pipeline:** Captured frames are sent to the upload editor for crop alignment and color extraction — the same workflow as uploaded photos.
+
+There is no automatic motion detection or live real-time scanning; you capture each frame yourself.
 
 ### 🖼️ Drag-and-Align Image Upload
 
-For devices without a live camera feed or for users who prefer pre-taken photos:
+Upload or drag-and-drop a photo of each face:
 
-* **Precision Calibration Interface:** Drop or upload pictures of individual cube faces into a dedicated calibration window.
-* **Interactive Frame Adjustment:** Drag, pan, and zoom the uploaded image relative to an on-screen absolute 3x3 matrix alignment template to ensure accurate pixel assessment.
+* **Precision calibration:** Align your image to an on-screen 3×3 grid using a draggable crop box.
+* **Color extraction:** Nine cell centers are sampled, converted to HSV, and matched to the nearest cube color.
+* **Per-sticker correction:** Tap any facelet to fix misclassified colors before confirming the face.
 
-### 🎨 Manual Color Matrix Override
+### 🎨 Manual Color Entry
 
-Ultimate fallback control over your cube state:
+Paint the cube by hand when photos aren't an option:
 
-* **Interactive Grid Palette:** Toggle a 2D matrix map at any stage of the input process.
-* **Click-to-Cycle Adjustment:** If tricky real-world lighting or heavy glares cause an incorrect scan, simply tap any individual facelet to manually adjust or paint the correct color assignment using an intuitive 6-color picker.
+* **Interactive 3×3 grid:** Click cells and pick from six colors; the center sticker is locked to the face color.
+* **Live sync:** Completed faces update the progress tracker and state string immediately.
 
-### 🕹️ Interactive 3D Simulation Player
+### 🕹️ Interactive 3D Solution Player
 
-Watch your custom solution play out on a digital twin before turning your physical cube:
+After solving, step through the move sequence on a 3D cube before touching your physical one:
 
-* **Dynamic Virtual Twin:** A gorgeous, fully responsive 3D representation of your scanned Rubik's Cube built directly on the canvas viewport.
-* **Granular Playback Controls:** Step through the generated optimal move sequence at your own pace with dedicated "Next Move", "Previous Move", and move counter indicators.
-* **Orbital Camera Freedom:** Freely drag, swipe, zoom, and orbit around the 3D model to inspect active face adjustments from any physical perspective or viewing angle.
+* **Virtual cube:** A Three.js 3D model reflects your scanned state.
+* **Playback controls:** Step forward and backward through moves with a move counter.
+* **Orbital camera:** Drag, zoom, and orbit to inspect the cube from any angle.
+
+### 🧠 Local Solver
+
+* **Kociemba two-phase algorithm** runs in a Web Worker via the bundled `cubejs` solver.
+* **Validation before solve:** The app checks that each color appears exactly nine times and that center stickers are correct.
+* **C++ solver** in `solvers/` is kept for a planned WebAssembly integration.
 
 ---
 
-## 🔒 Zero Friction & Absolute Privacy
+## 🔒 Privacy
 
-* **No Registration Required:** There are no sign-up forms, account setups, cookie confirmations, or social logins. Open the page and solve your cube immediately.
-* **Local Processing Isolation:** Your camera streams and uploaded photos are parsed completely locally. No pixel data, image frames, or local files are ever transmitted to an external server or cloud database, guaranteeing complete data privacy.
+* **No registration** — open the page and start solving.
+* **Local processing only** — camera frames, uploaded images, and solve computation never leave your browser.
+
+---
+
+## 🚀 Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+Open the dev server URL in your browser. Use **Manual** to paint faces, **Upload** for photos, or **Camera** (mobile) to capture a frame per face.
+
+To rebuild the JavaScript solver bundle from `cubejs`:
+
+```bash
+node bundle.cjs
+```

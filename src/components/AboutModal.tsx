@@ -35,9 +35,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
         <div className="ai">
-          <div className="atag">WASM</div>
+          <div className="atag">Solver</div>
           <div className="adesc">
-            The 54-char string feeds a C++ Kociemba Two-Phase solver compiled to WebAssembly — no server required.
+            The 54-char string is passed to a Kociemba two-phase solver (cubejs) running in a Web Worker — entirely local, no server required.
           </div>
         </div>
         <div className="ai">

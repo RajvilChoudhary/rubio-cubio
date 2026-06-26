@@ -39,8 +39,32 @@ export function hsvDist(
   [h1, s1, v1]: [number, number, number],
   [h2, s2, v2]: [number, number, number]
 ): number {
-  const dh = Math.min(Math.abs(h1 - h2), 360 - Math.abs(h1 - h2)) / 180;
-  return Math.sqrt(dh * dh * 2 + (s1 - s2) ** 2 * 1.5 + (v1 - v2) ** 2);
+  // Hue distance (0 to 1)
+  let dh = Math.min(Math.abs(h1 - h2), 360 - Math.abs(h1 - h2)) / 180;
+  
+  // If either color is very unsaturated (like white/grey), hue means very little.
+  // Scale the hue difference by the average saturation.
+  const avgS = (s1 + s2) / 2;
+  
+  // Weights for HSV components. Hue is weighted heavily when saturated, but drops to 0 when unsaturated.
+  const hueWeight = 6.0 * avgS; 
+  const satWeight = 2.0;
+  const valWeight = 1.0;
+
+  return Math.sqrt(
+    (dh * hueWeight) ** 2 + 
+    ((s1 - s2) * satWeight) ** 2 + 
+    ((v1 - v2) * valWeight) ** 2
+  );
 }
 
-export const CENTER_HSV = FACES.map(f => hexHsv(f.hex));
+// Calibrated real-world webcam HSV averages, corresponding to the FACES array order:
+// [White, Red, Green, Yellow, Orange, Blue]
+export const CENTER_HSV: [number, number, number][] = [
+  [0, 0.00, 0.80],   // White: Saturation is the only thing that matters
+  [0, 0.75, 0.70],   // Red: Hue ~0
+  [130, 0.70, 0.60], // Green: Hue ~130
+  [45, 0.80, 0.85],  // Yellow: Hue ~45
+  [18, 0.85, 0.85],  // Orange: Hue ~18
+  [215, 0.75, 0.60]  // Blue: Hue ~215
+];

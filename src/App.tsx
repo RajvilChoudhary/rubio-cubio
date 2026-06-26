@@ -231,6 +231,13 @@ self.onmessage = function(e) {
     if (!solverReady.current) {
       triggerNotification('Solver still initializing, try again shortly.'); return;
     }
+
+    // Instantly handle an already-solved cube
+    if (stateStr === 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB') {
+      setSolution('Already Solved!');
+      return;
+    }
+
     console.log('[solver] Sending state:', stateStr);
     setIsSolving(true);
 
@@ -353,7 +360,12 @@ self.onmessage = function(e) {
       </div>
 
       <AboutModal isOpen={isAboutOpen} onClose={handleToggleAbout} />
-      <SolutionModal isOpen={solution !== null} solution={solution ?? ''} onClose={() => setSolution(null)} />
+      <SolutionModal 
+        isOpen={solution !== null} 
+        solution={solution ?? ''} 
+        initialStateStr={dataToStateStr(data)}
+        onClose={() => setSolution(null)} 
+      />
     </>
   );
 };

@@ -1,8 +1,10 @@
 import React from 'react';
+import { Cube3DViewer } from './Cube3DViewer';
 
 interface SolutionModalProps {
   isOpen: boolean;
   solution: string;
+  initialStateStr: string;
   onClose: () => void;
 }
 
@@ -16,9 +18,9 @@ function getMoveColor(move: string): string {
   return MOVE_FACE_COLOR[face] || '#F0F0F5';
 }
 
-export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, onClose }) => {
+export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, initialStateStr, onClose }) => {
   const moves = solution ? solution.trim().split(/\s+/) : [];
-  const isSolved = solution === '' || solution === 'Already Solved!';
+  const isSolved = solution === '' || solution === 'Already Solved!' || (moves.length === 0 && solution);
 
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).id === 'solutionModal') onClose();
@@ -28,13 +30,15 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, 
     navigator.clipboard.writeText(solution).catch(() => {});
   };
 
+  if (!isOpen) return null;
+
   return (
     <div
       className={`mbg ${isOpen ? 'on' : ''}`}
       id="solutionModal"
       onClick={handleBackgroundClick}
     >
-      <div className="modal sol-modal">
+      <div className="modal sol-modal" style={{ maxWidth: '420px', width: '100%' }}>
         <button className="mclose" onClick={onClose} aria-label="Close">✕</button>
 
         <div className="sol-header">
@@ -61,19 +65,9 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, 
 
         {!isSolved && (
           <>
-            <div className="sol-moves">
-              {moves.map((move, i) => (
-                <span
-                  key={i}
-                  className="sol-chip"
-                  style={{ '--chip-color': getMoveColor(move) } as React.CSSProperties}
-                >
-                  {move}
-                </span>
-              ))}
-            </div>
+            <Cube3DViewer stateStr={initialStateStr} solution={solution} />
 
-            <div className="sol-raw">
+            <div className="sol-raw" style={{ marginTop: '16px' }}>
               <span className="sol-raw-text">{solution}</span>
             </div>
 
@@ -99,3 +93,4 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, 
     </div>
   );
 };
+

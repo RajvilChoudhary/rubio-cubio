@@ -576,37 +576,36 @@ export const UploadTab: React.FC<UploadTabProps> = ({
                   {/* inline color picker */}
                   {editCell !== null && (
                     <div className="ext-picker">
-                      <div style={{fontSize:'8px', color:'var(--muted)', marginBottom:'5px', letterSpacing:'0.08em'}}>PICK COLOR FOR CELL {editCell + 1}</div>
-                      <div style={{display:'flex', gap:'5px', flexWrap:'wrap'}}>
+                      <div className="ext-picker-label">PICK COLOR FOR CELL {editCell + 1}</div>
+                      <div className="ext-picker-colors">
                         {FACES.map(face => (
                           <div
                             key={face.id}
+                            className="ext-picker-swatch"
                             onClick={() => handleOverrideColor(editCell, face.hex)}
                             style={{
-                              width: '24px', height: '24px', borderRadius: '4px',
-                              background: face.hex, cursor: 'pointer',
+                              background: face.hex,
                               border: extracted.colors[editCell] === face.hex ? '2px solid #fff' : (face.hex === '#FFFFFF' || face.hex === '#FFD700' ? '1.5px solid #555' : '2px solid transparent'),
-                              transition: 'transform 0.1s'
                             }}
                             title={face.name}
                           />
                         ))}
                       </div>
                       <button
+                        className="ext-picker-cancel"
                         onClick={() => setEditCell(null)}
-                        style={{marginTop:'6px', fontSize:'9px', background:'none', border:'none', color:'var(--muted)', cursor:'pointer', padding:0}}
                       >✕ cancel</button>
                     </div>
                   )}
                 </div>
                 {showHsv && (
-                  <div id="hsvPanel" style={{ fontSize: '9px', color: 'var(--muted)', lineHeight: '1.9', display: 'block' }}>
-                    <div style={{ fontSize: '8px', color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: '3px' }}>HSV</div>
+                  <div id="hsvPanel" className="hsv-panel">
+                    <div className="hsv-panel-label">HSV</div>
                     {extracted.hsv.map(([h, s, v], idx) => {
                       const color = extracted.colors[idx];
                       return (
-                        <div key={idx} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                          <span style={{ width:'8px', height:'8px', borderRadius:'2px', background:color, display:'inline-block', flexShrink:0, border: color==='#FFFFFF'?'1px solid #444':undefined }} />
+                        <div key={idx} className="hsv-row">
+                          <span className="hsv-dot" style={{ background: color, border: color === '#FFFFFF' ? '1px solid #444' : undefined }} />
                           <span>{Math.round(h)}° {(s * 100).toFixed(0)}% {(v * 100).toFixed(0)}%</span>
                         </div>
                       );

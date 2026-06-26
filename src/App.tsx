@@ -17,9 +17,8 @@ const STORAGE_KEY = 'rubio-cubio-progress';
 const EMPTY_DATA: Record<FaceId, string[] | null> = { U: null, R: null, F: null, D: null, L: null, B: null };
 
 // --- helpers ---
-const hex2id: Record<string, FaceId> = {};
-const id2hex: Record<FaceId, string> = {};
-FACES.forEach(f => { hex2id[f.hex] = f.id; id2hex[f.id] = f.hex; });
+const id2hex = Object.fromEntries(FACES.map(f => [f.id, f.hex])) as Record<FaceId, string>;
+const hex2id = Object.fromEntries(FACES.map(f => [f.hex, f.id])) as Record<string, FaceId>;
 
 /** Build 54-char state string from face data (uses · for missing faces) */
 function dataToStateStr(data: Record<FaceId, string[] | null>): string {
@@ -59,11 +58,6 @@ function validateStateStr(str: string): string | null {
       return `Center of ${FACES[i].name} face should be ${FACES[i].id}, got ${centerChar}.`;
   }
   return null; // valid
-}
-
-/** Default colors for a single face (center locked, rest null) */
-function defaultFaceColors(faceId: FaceId): (string | null)[] {
-  return Array(9).fill(null).map((_, i) => i === 4 ? id2hex[faceId] : null);
 }
 
 export const App: React.FC = () => {
@@ -278,7 +272,7 @@ self.onmessage = function(e) {
           </div>
 
           <div>
-            <div style={{ fontSize: '9px', letterSpacing: '0.1em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
+            <div className="progress-label">
               Progress
             </div>
             <CubeNet curFaceIdx={curFaceIdx} data={data} onJumpToFace={handleJumpToFace} />
@@ -323,36 +317,23 @@ self.onmessage = function(e) {
             <div className="plabel">State string (54 chars)</div>
             <input
               id="stateInput"
+              className={`state-input${stateInput.length === 54 ? ' valid' : ''}`}
               type="text"
               value={stateInput}
               onChange={handleStateInput}
               maxLength={54}
               placeholder="UUUUUUUUURRR…"
               spellCheck={false}
-              style={{
-                width: '100%',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                letterSpacing: '0.06em',
-                padding: '8px 10px',
-                background: 'var(--surface2)',
-                border: `1.5px solid ${stateInput.length === 54 ? 'var(--accent)' : 'var(--border)'}`,
-                borderRadius: '7px',
-                color: 'var(--text)',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
             />
-            <div style={{ fontSize: '9px', color: 'var(--muted)', marginTop: '5px' }}>
+            <div className="state-input-hint">
               {stateInput.length}/54 — paste or type to load a state
             </div>
           </div>
 
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
-              className="btn btn-g"
+              className="btn btn-g clear-btn"
               onClick={handleClearAll}
-              style={{ width: '100%', padding: '10px', fontSize: '13px' }}
             >
               Clear All Inputs
             </button>

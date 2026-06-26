@@ -1,5 +1,3 @@
-import { FACES } from '../constants';
-
 export function hexRgb(hex: string): [number, number, number] {
   return [
     parseInt(hex.slice(1, 3), 16),

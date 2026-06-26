@@ -43,7 +43,6 @@ function getFaceletInfo(index: number): { pos: [number, number, number]; normal:
 export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [currentMove, setCurrentMove] = useState(-1);
-  const [isPlaying, setIsPlaying] = useState(false);
   const moves = solution.trim().split(/\s+/).filter(Boolean);
 
   const cubeGroup = useRef<THREE.Group | null>(null);
@@ -53,8 +52,10 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
   useEffect(() => {
     if (!mountRef.current) return;
 
-    const width = mountRef.current.clientWidth;
-    const height = 300;
+    const mount = mountRef.current;
+    const getHeight = () => Math.min(320, Math.max(220, mount.clientWidth * 0.85));
+    let width = mount.clientWidth;
+    let height = getHeight();
 
     const scene = new THREE.Scene();
     scene.background = null; // transparent
@@ -64,9 +65,9 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    mountRef.current.innerHTML = '';
-    mountRef.current.appendChild(renderer.domElement);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mount.innerHTML = '';
+    mount.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
@@ -157,7 +158,18 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
     };
     animate();
 
+    const resizeObserver = new ResizeObserver(() => {
+      if (!mount) return;
+      width = mount.clientWidth;
+      height = getHeight();
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    });
+    resizeObserver.observe(mount);
+
     return () => {
+      resizeObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
       renderer.dispose();
     };
@@ -174,10 +186,14 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
       
       let angle = Math.PI / 2;
       if (isDouble) angle = Math.PI;
-      let dir = isPrime ? 1 : -1;
-      if (reverse) dir *= -1;
-      
-      const targetAngle = angle * dir;
+
+      const group = cubeGroup.current;
+      if (!group) {
+        isAnimating.current = false;
+        resolve();
+        return;
+      }
+
       const frames = 15; // Animation duration in frames
       let currentFrame = 0;
 
@@ -192,11 +208,11 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
         const eps = 0.5;
         let inLayer = false;
         if (face === 'U' && p.y > eps) { axis.set(0, 1, 0); inLayer = true; }
-        else if (face === 'D' && p.y < -eps) { axis.set(0, 1, 0); inLayer = true; dir *= -1; }
+        else if (face === 'D' && p.y < -eps) { axis.set(0, 1, 0); inLayer = true; }
         else if (face === 'R' && p.x > eps) { axis.set(1, 0, 0); inLayer = true; }
-        else if (face === 'L' && p.x < -eps) { axis.set(1, 0, 0); inLayer = true; dir *= -1; }
+        else if (face === 'L' && p.x < -eps) { axis.set(1, 0, 0); inLayer = true; }
         else if (face === 'F' && p.z > eps) { axis.set(0, 0, 1); inLayer = true; }
-        else if (face === 'B' && p.z < -eps) { axis.set(0, 0, 1); inLayer = true; dir *= -1; }
+        else if (face === 'B' && p.z < -eps) { axis.set(0, 0, 1); inLayer = true; }
 
         if (inLayer) layerCubies.push(c);
       });
@@ -207,10 +223,10 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
 
       // Create a pivot object
       const pivot = new THREE.Group();
-      cubeGroup.current.add(pivot);
+      group.add(pivot);
       
       layerCubies.forEach(c => {
-        cubeGroup.current!.remove(c);
+        group.remove(c);
         pivot.add(c);
       });
 
@@ -229,9 +245,9 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
           layerCubies.forEach(c => {
             c.applyMatrix4(pivot.matrix);
             pivot.remove(c);
-            cubeGroup.current!.add(c);
+            group.add(c);
           });
-          cubeGroup.current!.remove(pivot);
+          group.remove(pivot);
           isAnimating.current = false;
           resolve();
         }
@@ -254,19 +270,9 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
   };
 
   return (
-    <div style={{ width: '100%' }}>
-      <div 
-        ref={mountRef} 
-        style={{ 
-          width: '100%', 
-          height: '300px', 
-          background: 'radial-gradient(circle at center, var(--surface2) 0%, transparent 100%)',
-          borderRadius: '8px',
-          marginBottom: '16px',
-          cursor: 'grab'
-        }} 
-      />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="cube3d-viewer">
+      <div ref={mountRef} className="cube3d-canvas" />
+      <div className="cube3d-controls">
         <button 
           className="btn btn-g" 
           onClick={handlePrev} 
@@ -274,7 +280,7 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
         >
           Previous
         </button>
-        <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+        <div className="cube3d-move-count">
           Move {currentMove + 1} / {moves.length}
         </div>
         <button 
@@ -285,7 +291,7 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
           Next Move
         </button>
       </div>
-      <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: 'var(--muted)' }}>
+      <div className="cube3d-hint">
         Drag to rotate the cube • Scroll to zoom
       </div>
     </div>

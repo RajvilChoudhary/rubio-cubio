@@ -72,7 +72,7 @@ export const ManualTab: React.FC<ManualTabProps> = ({
   return (
     <div id="t-manual">
       <div className="manual-body">
-        <div style={{ fontSize: '10px', color: 'var(--muted)', marginBottom: '10px', lineHeight: 1.6 }}>
+        <div className="manual-hint">
           Click a cell then pick its color. Center sticker is locked.
         </div>
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -96,7 +96,7 @@ export const ManualTab: React.FC<ManualTabProps> = ({
             })}
           </div>
           <div>
-            <div style={{ fontSize: '9px', color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: '7px', textTransform: 'uppercase' }}>Color</div>
+            <div className="manual-pal-label">Color</div>
             <div className="pal" id="pal">
               {FACES.map(face => {
                 const isSelected = selCol === face.hex;
@@ -114,7 +114,7 @@ export const ManualTab: React.FC<ManualTabProps> = ({
                 );
               })}
             </div>
-            <div style={{ background: 'var(--surface2)', borderRadius: '5px', padding: '7px 9px', fontSize: '9px', color: 'var(--muted)', lineHeight: '1.7', marginTop: '9px', maxWidth: '150px' }}>
+            <div className="manual-tip">
               Center sticker defines<br />the face identity.
             </div>
           </div>

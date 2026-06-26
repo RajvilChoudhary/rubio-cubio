@@ -8,16 +8,6 @@ interface SolutionModalProps {
   onClose: () => void;
 }
 
-const MOVE_FACE_COLOR: Record<string, string> = {
-  U: '#FFFFFF', R: '#FF4444', F: '#22C55E',
-  D: '#FFD700', L: '#FF8C00', B: '#3B82F6',
-};
-
-function getMoveColor(move: string): string {
-  const face = move[0];
-  return MOVE_FACE_COLOR[face] || '#F0F0F5';
-}
-
 export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, initialStateStr, onClose }) => {
   const moves = solution ? solution.trim().split(/\s+/) : [];
   const isSolved = solution === '' || solution === 'Already Solved!' || (moves.length === 0 && solution);

@@ -182,4 +182,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .adesc{font-size:11px;color:var(--text);line-height:1.6}
 .adesc small{color:var(--muted)}
 
+
+/* SOLUTION MODAL */
+.sol-modal{max-width:500px}
+.sol-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sol-icon{width:40px;height:40px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sol-subtitle{font-size:11px;color:var(--muted);margin-top:1px}
+.sol-moves{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.sol-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:36px;padding:5px 8px;
+  font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:0.06em;
+  border-radius:5px;
+  background:rgba(from var(--chip-color) r g b / 0.12);
+  border:1px solid rgba(from var(--chip-color) r g b / 0.3);
+  color:var(--chip-color);
+  transition:transform 0.1s;
+}
+.sol-chip:hover{transform:scale(1.08)}
+.sol-raw{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;margin-bottom:14px;overflow-x:auto}
+.sol-raw-text{font-family:var(--font);font-size:11px;color:var(--muted);word-break:break-all;white-space:pre-wrap}
+.sol-actions{display:flex;gap:8px}
+.sol-copy-btn{flex:1;padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--muted);font-family:var(--font);font-size:11px;letter-spacing:0.06em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.13s}
+.sol-copy-btn:hover{border-color:var(--subtle);color:var(--text)}
+.sol-close-btn{flex:1;padding:8px 14px;border:none;border-radius:6px;background:var(--text);color:var(--bg);font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:0.06em;cursor:pointer;transition:opacity 0.13s}
+.sol-close-btn:hover{opacity:0.85}
+
+/* Solve button loading state */
+.solve-btn.loading{opacity:0.6;cursor:wait}
+
 @media(max-width:640px){.shell{grid-template-columns:1fr}.right{border-left:none;border-top:1px solid var(--border)}}
+

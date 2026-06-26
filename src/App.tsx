@@ -250,6 +250,15 @@ self.onmessage = function(e) {
     solverWorker.current?.postMessage({ type: 'SOLVE', stateStr });
   };
 
+  /** Reset all cube state */
+  const handleClearAll = () => {
+    setData(EMPTY_DATA);
+    setCurFaceIdx(0);
+    setImageSrc(null);
+    setSolution(null);
+    triggerNotification('All inputs cleared.');
+  };
+
   const allFacesDone = Object.values(data).every(Boolean);
   const stepSubText = `Point the ${f.name.toLowerCase()} center face at the camera. ${TOP_HINT[f.id] || ''}`;
 
@@ -339,7 +348,14 @@ self.onmessage = function(e) {
             </div>
           </div>
 
-          <div style={{ marginTop: 'auto' }}>
+          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button
+              className="btn btn-g"
+              onClick={handleClearAll}
+              style={{ width: '100%', padding: '10px', fontSize: '13px' }}
+            >
+              Clear All Inputs
+            </button>
             <button
               className={`solve-btn${isSolving ? ' loading' : ''}`}
               id="solveBtn"

@@ -5,6 +5,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 interface Cube3DViewerProps {
   stateStr: string;
   solution: string;
+  currentMoveIndex?: number;
+  onMoveChange?: (index: number) => void;
 }
 
 const FACE_COLORS: Record<string, number> = {
@@ -40,9 +42,9 @@ function getFaceletInfo(index: number): { pos: [number, number, number]; normal:
   }
 }
 
-export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }) => {
+export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution, currentMoveIndex = -1, onMoveChange }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [currentMove, setCurrentMove] = useState(-1);
+  const [localCurrentMove, setLocalCurrentMove] = useState(currentMoveIndex);
   const moves = solution.trim().split(/\s+/).filter(Boolean);
 
   const cubeGroup = useRef<THREE.Group | null>(null);
@@ -194,7 +196,7 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
         return;
       }
 
-      const frames = 15; // Animation duration in frames
+      const frames = 30; // Animation duration in frames
       let currentFrame = 0;
 
       let axis = new THREE.Vector3();
@@ -256,17 +258,24 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
     });
   };
 
+  // Sync with prop changes
+  useEffect(() => {
+    setLocalCurrentMove(currentMoveIndex);
+  }, [currentMoveIndex]);
+
   const handleNext = async () => {
-    if (isAnimating.current || currentMove >= moves.length - 1) return;
-    const nextIdx = currentMove + 1;
+    if (isAnimating.current || localCurrentMove >= moves.length - 1) return;
+    const nextIdx = localCurrentMove + 1;
     await animateMove(moves[nextIdx], false);
-    setCurrentMove(nextIdx);
+    setLocalCurrentMove(nextIdx);
+    onMoveChange?.(nextIdx);
   };
 
   const handlePrev = async () => {
-    if (isAnimating.current || currentMove < 0) return;
-    await animateMove(moves[currentMove], true);
-    setCurrentMove(currentMove - 1);
+    if (isAnimating.current || localCurrentMove < 0) return;
+    await animateMove(moves[localCurrentMove], true);
+    setLocalCurrentMove(localCurrentMove - 1);
+    onMoveChange?.(localCurrentMove - 1);
   };
 
   return (
@@ -276,17 +285,17 @@ export const Cube3DViewer: React.FC<Cube3DViewerProps> = ({ stateStr, solution }
         <button 
           className="btn btn-g" 
           onClick={handlePrev} 
-          disabled={currentMove < 0 || isAnimating.current}
+          disabled={localCurrentMove < 0 || isAnimating.current}
         >
           Previous
         </button>
         <div className="cube3d-move-count">
-          Move {currentMove + 1} / {moves.length}
+          Move {localCurrentMove + 1} / {moves.length}
         </div>
         <button 
           className="btn btn-p" 
           onClick={handleNext} 
-          disabled={currentMove >= moves.length - 1 || isAnimating.current}
+          disabled={localCurrentMove >= moves.length - 1 || isAnimating.current}
         >
           Next Move
         </button>

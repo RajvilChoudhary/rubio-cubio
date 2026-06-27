@@ -315,16 +315,26 @@ self.onmessage = function(e) {
 
           <div>
             <div className="plabel">State string (54 chars)</div>
-            <input
-              id="stateInput"
-              className={`state-input${stateInput.length === 54 ? ' valid' : ''}`}
-              type="text"
-              value={stateInput}
-              onChange={handleStateInput}
-              maxLength={54}
-              placeholder="UUUUUUUUURRR…"
-              spellCheck={false}
-            />
+            <div className="state-input-wrapper">
+              <input
+                id="stateInput"
+                className={`state-input${stateInput.length === 54 ? ' valid' : ''}`}
+                type="text"
+                value={stateInput}
+                onChange={handleStateInput}
+                maxLength={54}
+                placeholder="UUUUUUUUURRR…"
+                spellCheck={false}
+                style={{ color: 'transparent', caretColor: 'white' }}
+              />
+              <div className="state-input-colorful">
+                {stateInput.split('').map((char, i) => (
+                  <span key={i} style={{ color: id2hex[char as FaceId] || '#666' }}>
+                    {char || '·'}
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="state-input-hint">
               {stateInput.length}/54 — paste or type to load a state
             </div>

@@ -11,6 +11,7 @@ interface SolutionModalProps {
 export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, initialStateStr, onClose }) => {
   const moves = solution ? solution.trim().split(/\s+/) : [];
   const isSolved = solution === '' || solution === 'Already Solved!' || (moves.length === 0 && solution);
+  const [currentMoveIndex, setCurrentMoveIndex] = React.useState(-1);
 
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).id === 'solutionModal') onClose();
@@ -55,7 +56,24 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ isOpen, solution, 
 
         {!isSolved && (
           <>
-            <Cube3DViewer stateStr={initialStateStr} solution={solution} />
+            <Cube3DViewer 
+              stateStr={initialStateStr} 
+              solution={solution} 
+              currentMoveIndex={currentMoveIndex}
+              onMoveChange={setCurrentMoveIndex}
+            />
+
+            <div className="sol-moves">
+              {moves.map((move, idx) => (
+                <span 
+                  key={idx} 
+                  className={`sol-chip ${idx === currentMoveIndex + 1 ? 'current' : ''} ${idx <= currentMoveIndex ? 'done' : ''}`}
+                  style={{ '--chip-color': idx === currentMoveIndex + 1 ? '#FFD700' : '#6B6B80' } as React.CSSProperties}
+                >
+                  {move}
+                </span>
+              ))}
+            </div>
 
             <div className="sol-raw" style={{ marginTop: '16px' }}>
               <span className="sol-raw-text">{solution}</span>

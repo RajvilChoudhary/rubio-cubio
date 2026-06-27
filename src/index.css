@@ -216,6 +216,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:va
   transition:transform 0.1s;
 }
 .sol-chip:hover{transform:scale(1.08)}
+.sol-chip.current{
+  background:rgba(255,215,0,0.15);
+  border-color:#FFD700;
+  color:#FFD700;
+  box-shadow:0 0 0 2px rgba(255,215,0,0.3);
+}
+.sol-chip.done{
+  opacity:0.4;
+}
 .sol-raw{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;margin-bottom:14px;overflow-x:auto}
 .sol-raw-text{font-family:var(--font);font-size:var(--fs-sm);color:var(--muted);word-break:break-all;white-space:pre-wrap}
 .sol-actions{display:flex;gap:8px}
@@ -228,13 +237,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:va
 .solve-btn.loading{opacity:0.6;cursor:wait}
 
 /* State string input */
+.state-input-wrapper{position:relative}
 .state-input{
   width:100%;font-family:var(--font);font-size:var(--fs-md);letter-spacing:0.06em;
   padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);
-  border-radius:8px;color:var(--text);outline:none;box-sizing:border-box;
+  border-radius:8px;color:var(--text);outline:none;box-sizing:border-box;position:relative;z-index:1;
 }
 .state-input:focus{border-color:var(--subtle)}
 .state-input.valid{border-color:#22C55E}
+.state-input-colorful{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  font-family:var(--font);font-size:var(--fs-md);letter-spacing:0.06em;
+  padding:10px 12px;pointer-events:none;white-space:pre;overflow:hidden;
+  z-index:2
+}
 .state-input-hint{font-size:var(--fs-xs);color:var(--muted);margin-top:6px}
 
 /* 3D viewer */

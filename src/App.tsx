@@ -9,7 +9,7 @@ import { UploadTab } from './components/UploadTab';
 import { CameraTab } from './components/CameraTab';
 import { ManualTab } from './components/ManualTab';
 import { SolutionModal } from './components/SolutionModal';
-import cubeBundleUrl from './cubeBundle.js?url';
+import KociembaWorker from './kociembaWorker?worker';
 
 // --- constants ---
 const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
@@ -109,75 +109,43 @@ export const App: React.FC = () => {
     if (msg) setTimeout(() => setNote(''), 4000);
   };
 
-  // ── Web Worker (Blob-based to bypass Vite module issues) ─────────────
+  // ── Web Worker (Vite module worker — kociemba-wasm) ──────────────────
   const solverWorker = useRef<Worker | null>(null);
   const solverReady = useRef(false);
   const solveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    let worker: Worker;
-    fetch(cubeBundleUrl)
-      .then(r => r.text())
-      .then(bundleCode => {
-        // Strip the ES module export — run as classic script in worker
-        const classicCode = bundleCode.replace(/^export default __Cube;$/m, '');
-        const workerSrc = classicCode + `
-self.onmessage = function(e) {
-  if (e.data.type === 'INIT') {
-    try {
-      __Cube.initSolver();
-      self.postMessage({ type: 'INIT_DONE' });
-    } catch(err) {
-      self.postMessage({ type: 'ERROR', error: 'Init failed: ' + err.message });
-    }
-  } else if (e.data.type === 'SOLVE') {
-    try {
-      var cube = __Cube.fromString(e.data.stateStr);
-      var solution = cube.solve();
-      self.postMessage({ type: 'SOLUTION', solution: solution });
-    } catch(err) {
-      self.postMessage({ type: 'ERROR', error: err.message || 'Solve failed' });
-    }
-  }
-};
-`;
-        const blob = new Blob([workerSrc], { type: 'application/javascript' });
-        worker = new Worker(URL.createObjectURL(blob));
-        solverWorker.current = worker;
+    const worker = new KociembaWorker();
+    solverWorker.current = worker;
 
-        worker.onmessage = (e) => {
-          const { type, solution: sol, error } = e.data;
-          if (type === 'INIT_DONE') {
-            solverReady.current = true;
-            console.log('[solver] Ready ✓');
-          } else if (type === 'SOLUTION') {
-            if (solveTimeout.current) { clearTimeout(solveTimeout.current); solveTimeout.current = null; }
-            setSolution(sol ?? '');
-            setNote('');
-            setIsSolving(false);
-          } else if (type === 'ERROR') {
-            if (solveTimeout.current) { clearTimeout(solveTimeout.current); solveTimeout.current = null; }
-            console.error('[solver]', error);
-            triggerNotification(`Solver error: ${error}`);
-            setIsSolving(false);
-          }
-        };
+    worker.onmessage = (e) => {
+      const { type, solution: sol, error } = e.data;
+      if (type === 'INIT_DONE') {
+        solverReady.current = true;
+        console.log('[solver] Wasm ready ✓');
+      } else if (type === 'SOLUTION') {
+        if (solveTimeout.current) { clearTimeout(solveTimeout.current); solveTimeout.current = null; }
+        setSolution(sol ?? '');
+        setNote('');
+        setIsSolving(false);
+      } else if (type === 'ERROR') {
+        if (solveTimeout.current) { clearTimeout(solveTimeout.current); solveTimeout.current = null; }
+        console.error('[solver]', error);
+        triggerNotification(`Solver error: ${error}`);
+        setIsSolving(false);
+      }
+    };
 
-        worker.onerror = (e) => {
-          console.error('[solver worker crash]', e);
-          triggerNotification(`Worker crashed: ${e.message ?? 'unknown'}`);
-          setIsSolving(false);
-        };
+    worker.onerror = (e) => {
+      console.error('[solver worker crash]', e);
+      triggerNotification(`Worker crashed: ${e.message ?? 'unknown'}`);
+      setIsSolving(false);
+    };
 
-        // Kick off initSolver in background
-        worker.postMessage({ type: 'INIT' });
-      })
-      .catch(err => {
-        console.error('[solver] Failed to load bundle:', err);
-        triggerNotification('Failed to load solver.');
-      });
+    // Initialize the Wasm module inside the worker
+    worker.postMessage({ type: 'INIT' });
 
-    return () => { worker?.terminate(); };
+    return () => { worker.terminate(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
